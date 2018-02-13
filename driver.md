@@ -138,7 +138,6 @@ To do so, we'll extend sort `JSON` with some EVM specific syntax, and provide a 
            <nonce> NONCE => NONCE +Int 1 </nonce>
            ...
          </account>
-         <activeAccounts> ... ACCTFROM |-> (_ => false) ... </activeAccounts>
          <touchedAccounts> _ => SetItem(MINER) </touchedAccounts>
 
     rule <k> loadTx(ACCTFROM)
@@ -167,7 +166,6 @@ To do so, we'll extend sort `JSON` with some EVM specific syntax, and provide a 
            <nonce> NONCE => NONCE +Int 1 </nonce>
            ...
          </account>
-         <activeAccounts> ... ACCTFROM |-> (_ => false) ... </activeAccounts>
          <touchedAccounts> _ => SetItem(MINER) </touchedAccounts>
       requires ACCTTO =/=K .Account
 
@@ -212,12 +210,11 @@ To do so, we'll extend sort `JSON` with some EVM specific syntax, and provide a 
            <balance> MINBAL => MINBAL +Int Rb < SCHED > </balance>
            ...
          </account>
-         <activeAccounts> ... MINER |-> (_ => false) ... </activeAccounts>
 
     rule <k> (.K => #newAccount MINER) ~> #finalizeBlock ... </k>
          <coinbase> MINER </coinbase>
          <activeAccounts> ACCTS </activeAccounts>
-      requires notBool MINER in_keys(ACCTS)
+      requires notBool MINER in ACCTS
 
     rule <k> #rewardOmmers(.JSONList) => . ... </k>
     rule <k> #rewardOmmers([ _ , _ , OMMER , _ , _ , _ , _ , _ , OMMNUM , _ ] , REST) => #rewardOmmers(REST) ... </k>
@@ -234,7 +231,6 @@ To do so, we'll extend sort `JSON` with some EVM specific syntax, and provide a 
            <balance> OMMBAL => OMMBAL +Int Rb < SCHED > +Int (OMMNUM -Int CURNUM) *Int (Rb < SCHED > /Int 8) </balance>
           ...
          </account>
-         <activeAccounts> ... MINER |-> (_ => false) OMMER |-> (_ => false) ... </activeAccounts>
 ```
 
 -   `exception` only clears from the `<k>` cell if there is an exception preceding it.
@@ -390,7 +386,7 @@ State Manipulation
     syntax EthreumCommand ::= "clearNETWORK"
  // ----------------------------------------
     rule <k> clearNETWORK => . ... </k>
-         <activeAccounts> _ => .Map    </activeAccounts>
+         <activeAccounts> _ => .Set    </activeAccounts>
          <accounts>       _ => .Bag    </accounts>
          <messages>       _ => .Bag    </messages>
          <schedule>       _ => DEFAULT </schedule>
@@ -442,7 +438,6 @@ The individual fields of the accounts are dealt with here.
            <balance> _ => BAL </balance>
            ...
          </account>
-         <activeAccounts> ... ACCT |-> (EMPTY => #if BAL =/=Int 0 #then false #else EMPTY #fi) ... </activeAccounts>
 
     rule <k> load "account" : { ACCT : { "code" : (CODE:WordStack) } } => . ... </k>
          <account>
@@ -450,7 +445,6 @@ The individual fields of the accounts are dealt with here.
            <code> _ => CODE </code>
            ...
          </account>
-         <activeAccounts> ... ACCT |-> (EMPTY => #if CODE =/=K .WordStack #then false #else EMPTY #fi) ... </activeAccounts>
 
     rule <k> load "account" : { ACCT : { "nonce" : (NONCE:Int) } } => . ... </k>
          <account>
@@ -458,7 +452,6 @@ The individual fields of the accounts are dealt with here.
            <nonce> _ => NONCE </nonce>
            ...
          </account>
-         <activeAccounts> ... ACCT |-> (EMPTY => #if NONCE =/=Int 0 #then false #else EMPTY #fi) ... </activeAccounts>
 
     rule <k> load "account" : { ACCT : { "storage" : (STORAGE:Map) } } => . ... </k>
          <account>
