@@ -458,6 +458,7 @@ The `#next` operator executes a single step by:
     rule <mode> EXECMODE </mode>
          <k> #next
           => #pushCallStack ~> #exceptional? [ OP ]
+                            ~> #load         [ OP ]
                             ~> #exec         [ OP ]
                             ~> #pc           [ OP ]
           ~> #? #dropCallStack : #popCallStack ?#
@@ -689,10 +690,10 @@ Some of them require an argument to be interpereted as an address (modulo 160 bi
                         | TernStackOp Int Int Int
                         | QuadStackOp Int Int Int Int
  // -------------------------------------------------
-    rule <k> #exec [ UOP:UnStackOp   => UOP #addr?(UOP, W0)          ] ... </k> <wordStack> W0 : WS                => WS </wordStack>
-    rule <k> #exec [ BOP:BinStackOp  => BOP #addr?(BOP, W0) W1       ] ... </k> <wordStack> W0 : W1 : WS           => WS </wordStack>
-    rule <k> #exec [ TOP:TernStackOp => TOP #addr?(TOP, W0) W1 W2    ] ... </k> <wordStack> W0 : W1 : W2 : WS      => WS </wordStack>
-    rule <k> #exec [ QOP:QuadStackOp => QOP #addr?(QOP, W0) W1 W2 W3 ] ... </k> <wordStack> W0 : W1 : W2 : W3 : WS => WS </wordStack>
+    rule <k> #exec [ UOP:UnStackOp   => UOP W0          ] ... </k> <wordStack> W0 : WS                => WS </wordStack>
+    rule <k> #exec [ BOP:BinStackOp  => BOP W0 W1       ] ... </k> <wordStack> W0 : W1 : WS           => WS </wordStack>
+    rule <k> #exec [ TOP:TernStackOp => TOP W0 W1 W2    ] ... </k> <wordStack> W0 : W1 : W2 : WS      => WS </wordStack>
+    rule <k> #exec [ QOP:QuadStackOp => QOP W0 W1 W2 W3 ] ... </k> <wordStack> W0 : W1 : W2 : W3 : WS => WS </wordStack>
 ```
 
 `StackOp` is used for opcodes which require a large portion of the stack.
@@ -709,8 +710,8 @@ The `CallOp` opcodes all interperet their second argument as an address.
     syntax InternalOp ::= CallSixOp Int Int     Int Int Int Int
                         | CallOp    Int Int Int Int Int Int Int
  // -----------------------------------------------------------
-    rule <k> #exec [ CSO:CallSixOp => CSO W0 #addr(W1)    W2 W3 W4 W5 ] ... </k> <wordStack> W0 : W1 : W2 : W3 : W4 : W5 : WS      => WS </wordStack>
-    rule <k> #exec [ CO:CallOp     => CO  W0 #addr(W1) W2 W3 W4 W5 W6 ] ... </k> <wordStack> W0 : W1 : W2 : W3 : W4 : W5 : W6 : WS => WS </wordStack>
+    rule <k> #exec [ CSO:CallSixOp => CSO W0 W1    W2 W3 W4 W5 ] ... </k> <wordStack> W0 : W1 : W2 : W3 : W4 : W5 : WS      => WS </wordStack>
+    rule <k> #exec [ CO:CallOp     => CO  W0 W1 W2 W3 W4 W5 W6 ] ... </k> <wordStack> W0 : W1 : W2 : W3 : W4 : W5 : W6 : WS => WS </wordStack>
 ```
 
 ### Helpers
@@ -719,13 +720,55 @@ The `CallOp` opcodes all interperet their second argument as an address.
 -   `#gas` calculates how much gas this operation costs, and takes into account the memory consumed.
 
 ```k
-    syntax Int ::= "#addr?" "(" OpCode "," Int ")" [function]
- // ---------------------------------------------------------
-    rule #addr?(BALANCE,      W) => #addr(W)
-    rule #addr?(EXTCODESIZE,  W) => #addr(W)
-    rule #addr?(EXTCODECOPY,  W) => #addr(W)
-    rule #addr?(SELFDESTRUCT, W) => #addr(W)
-    rule #addr?(OP, W)           => W        requires (OP =/=K BALANCE) andBool (OP =/=K EXTCODESIZE) andBool (OP =/=K EXTCODECOPY) andBool (OP =/=K SELFDESTRUCT)
+    syntax InternalOp ::= "#load" "[" OpCode "]"
+ // --------------------------------------------
+    rule <k> #load [ OP:OpCode ] => #loadAccount(#addr(W0)) ... </k>
+         <wordStack> (W0 => #addr(W0)) : WS </wordStack>
+      requires #addr?(OP)
+
+    rule <k> #load [ OP:OpCode ] => #loadAccount(#addr(W0)) ~> #lookupCode(#addr(W0)) ... </k>
+         <wordStack> (W0 => #addr(W0)) : WS </wordStack>
+      requires #code?(OP)
+
+    rule <k> #load [ OP:OpCode ] => #loadAccount(#addr(W1)) ~> #lookupCode(#addr(W1)) ... </k>
+         <wordStack> W0 : (W1 => #addr(W1)) : WS </wordStack>
+      requires isCallOp(OP) orBool isCallSixOp(OP)
+
+    rule <k> #load [ CREATE ] => #loadAccount(#newAddr(ACCT, NONCE)) ... </k>
+         <id> ACCT </id>
+         <account>
+           <acctID> ACCT </acctID>
+           <nonce> NONCE </nonce>
+           ...
+         </account>
+
+    rule <k> #load [ OP:OpCode ] => #lookupStorage(ACCT, W0) ... </k>
+         <id> ACCT </id>
+         <wordStack> W0 : WS </wordStack>
+      requires OP ==K SSTORE orBool OP ==K SLOAD
+
+    rule #load [ OP:OpCode ] => .
+      requires notBool (
+        OP ==K CREATE   orBool
+        OP ==K SLOAD    orBool
+        OP ==K SSTORE   orBool
+        isCallOp   (OP) orBool
+        isCallSixOp(OP) orBool
+        #addr?(OP)      orBool
+        #code?(OP)
+      )
+
+    syntax Bool ::= "#addr?" "(" OpCode ")" [function]
+ // --------------------------------------------------
+    rule #addr?(BALANCE)      => true
+    rule #addr?(SELFDESTRUCT) => true
+    rule #addr?(OP)           => false requires (OP =/=K BALANCE) andBool (OP =/=K SELFDESTRUCT)
+
+    syntax Bool ::= "#code?" "(" OpCode ")" [function]
+ // --------------------------------------------------
+    rule #code?(EXTCODESIZE)  => true
+    rule #code?(EXTCODECOPY)  => true
+    rule #code?(OP)           => false requires (OP =/=K EXTCODESIZE) andBool (OP =/=K EXTCODECOPY)
 
     syntax InternalOp ::= "#gas" "[" OpCode "]" | "#deductGas" | "#deductMemory"
  // ----------------------------------------------------------------------------
@@ -926,7 +969,8 @@ These are just used by the other operators for shuffling local execution state a
 
 ```k
     syntax InternalOp ::= "#newAccount" Int
- // ---------------------------------------
+                        | "#loadAccount" Int
+ // ----------------------------------------
     rule <k> #newAccount ACCT => #exception ... </k>
          <account>
            <acctID> ACCT  </acctID>
@@ -960,6 +1004,44 @@ These are just used by the other operators for shuffling local execution state a
            ...
          </accounts>
       requires notBool ACCT in ACCTS
+```
+
+```{.k .java .ocaml}
+    rule #loadAccount ACCT => .
+```
+
+-   `#lookupCode` loads the code of an account into the `<code>` cell.
+
+```k
+    syntax InternalOp ::= #lookupCode ( Int )
+ // -----------------------------------------
+```
+
+```{.k .java .ocaml}
+    rule #lookupCode(_) => .
+```
+
+-   `#lookupStorage` loads the value of the specified storage key into the `<storage>` cell.
+
+```k
+    syntax InternalOp ::= #lookupStorage ( Int , Int )
+ // ------------------------------------------------------
+    rule <k> #lookupStorage(ACCT, INDEX) => . ... </k>
+         <account>
+           <acctID> ACCT </acctID>
+           <storage> ... INDEX |-> _ ... </storage>
+           ...
+         </account>
+```
+
+```{.k .java .ocaml}
+    rule <k> #lookupStorage(ACCT, INDEX) => . ... </k>
+         <account>
+           <acctID> ACCT </acctID>
+           <storage> STORAGE </storage>
+           ...
+         </account>
+      requires notBool INDEX in_keys(STORAGE)
 ```
 
 -   `#transferFunds` moves money from one account into another, creating the destination account if it doesn't exist.
@@ -1147,7 +1229,9 @@ These operators make queries about the current execution state.
     syntax UnStackOp ::= "BLOCKHASH"
  // --------------------------------
     rule <k> BLOCKHASH N => #if N >=Int HI orBool HI -Int 256 >Int N #then 0 #else #parseHexWord(Keccak256(Int2String(N))) #fi ~> #push ... </k> <number> HI </number> <mode> VMTESTS </mode>
+```
 
+```{.k .java .ocaml}
     rule <k> BLOCKHASH N => #blockhash(HASHES, N, HI -Int 1, 0) ~> #push ... </k> <number> HI </number> <blockhash> HASHES </blockhash> <mode> NORMAL </mode>
 
     syntax Int ::= #blockhash ( List , Int , Int , Int ) [function]
