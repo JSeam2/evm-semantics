@@ -207,7 +207,7 @@ module TRANSFER-SPEC
 
          <selfDestruct>   .Set               </selfDestruct>
          <log>            .List              </log>
-         <activeAccounts> %ACCT_ID |-> false </activeAccounts>
+         <activeAccounts> SetItem(%ACCT_ID) </activeAccounts>
          <messages>       .Bag               </messages>
 ```
 
@@ -326,7 +326,7 @@ module TRANSFER-FROM-SPEC
 
          <selfDestruct>   .Set               </selfDestruct>
          <log>            .List              </log>
-         <activeAccounts> %ACCT_ID |-> false </activeAccounts>
+         <activeAccounts> SetItem(%ACCT_ID) </activeAccounts>
          <messages>       .Bag               </messages>
 ```
 
@@ -453,7 +453,7 @@ imports ETHEREUM-SIMULATION
          <previousHash> 0               </previousHash>
          <difficulty>   256             </difficulty>
 
-         <activeAccounts> %ACCT_ID |-> false </activeAccounts>
+         <activeAccounts> SetItem(%ACCT_ID) </activeAccounts>
          <accounts>
            <account>
              <acctID>  %ACCT_ID          </acctID>
@@ -523,7 +523,7 @@ module APPROVE-SPEC
          <previousHash> 0               </previousHash>
          <difficulty>   256             </difficulty>
 
-         <activeAccounts> %ACCT_ID |-> false </activeAccounts>
+         <activeAccounts> SetItem(%ACCT_ID) </activeAccounts>
          <accounts>
            <account>
            <acctID>  %ACCT_ID          </acctID>
@@ -595,7 +595,7 @@ module BALANCE-OF-SPEC
          <previousHash> 0               </previousHash>
          <difficulty>   256             </difficulty>
 
-         <activeAccounts> %ACCT_ID |-> false </activeAccounts>
+         <activeAccounts> SetItem(%ACCT_ID) </activeAccounts>
          <accounts>
            <account>
              <acctID>  %ACCT_ID          </acctID>
