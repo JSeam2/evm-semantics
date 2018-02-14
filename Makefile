@@ -192,7 +192,21 @@ proof_tests=${proof_dir}/sum-to-n-spec.k \
             ${proof_dir}/erc20/hobby/transferFrom-success-1-spec.k \
             ${proof_dir}/erc20/hobby/transferFrom-success-2-spec.k \
             ${proof_dir}/erc20/hobby/transferFrom-failure-1-spec.k \
-            ${proof_dir}/erc20/hobby/transferFrom-failure-2-spec.k
+            ${proof_dir}/erc20/hobby/transferFrom-failure-2-spec.k \
+            ${proof_dir}/erc20/consensys/totalSupply-spec.k \
+            ${proof_dir}/erc20/consensys/balanceOf-spec.k \
+            ${proof_dir}/erc20/consensys/allowance-spec.k \
+            ${proof_dir}/erc20/consensys/approve-spec.k \
+            ${proof_dir}/erc20/consensys/transfer-success-1-spec.k \
+            ${proof_dir}/erc20/consensys/transfer-success-2-spec.k \
+            ${proof_dir}/erc20/consensys/transfer-failure-1-spec.k \
+            ${proof_dir}/erc20/consensys/transfer-failure-2-spec.k \
+            ${proof_dir}/erc20/consensys/transferFrom-success-1-a-spec.k \
+            ${proof_dir}/erc20/consensys/transferFrom-success-1-b-spec.k \
+            ${proof_dir}/erc20/consensys/transferFrom-success-2-a-spec.k \
+            ${proof_dir}/erc20/consensys/transferFrom-success-2-b-spec.k \
+            ${proof_dir}/erc20/consensys/transferFrom-failure-1-spec.k \
+            ${proof_dir}/erc20/consensys/transferFrom-failure-2-spec.k \
 
 
 proof-test-all: proof-test
@@ -230,6 +244,10 @@ tests/proofs/erc20/hkg/%-spec.k: proofs/erc20/tmpl.k proofs/erc20/hkg/spec-hkg.i
 	mkdir -p $(dir $@)
 	python3 tests/gen-spec.py $^ $* > $@
 tests/proofs/erc20/hobby/%-spec.k: proofs/erc20/tmpl.k proofs/erc20/hobby/spec-hobby.ini proofs/erc20/hobby/pgm-hobby.ini
+	@echo >&2 "==  gen-spec: $@"
+	mkdir -p $(dir $@)
+	python3 tests/gen-spec.py $^ $* > $@
+tests/proofs/erc20/consensys/%-spec.k: proofs/erc20/tmpl.k proofs/erc20/consensys/spec-consensys.ini proofs/erc20/consensys/pgm-consensys.ini
 	@echo >&2 "==  gen-spec: $@"
 	mkdir -p $(dir $@)
 	python3 tests/gen-spec.py $^ $* > $@
