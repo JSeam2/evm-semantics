@@ -261,7 +261,9 @@ Note that `TEST` is sorted here so that key `"network"` comes before key `"pre"`
 ```{.k .java .ocaml}
     syntax EthereumCommand ::= "run" JSON
  // -------------------------------------
-    rule run { .JSONList } => .
+    rule run          { .JSONList } => .
+    rule run TESTID : { .JSONList } => .
+
     rule run { TESTID : { TEST:JSONList } , TESTS }
       => run ( TESTID : { #sortJSONList(TEST) } )
       ~> #if #hasPost?( { TEST } ) #then .K #else exception #fi
@@ -283,8 +285,8 @@ Note that `TEST` is sorted here so that key `"network"` comes before key `"pre"`
 
     rule run TESTID : { KEY : (VAL:JSON) , REST } => load KEY : VAL ~> run TESTID : { REST } requires KEY in #loadKeys
 
-    rule run TESTID : { "blocks" : [ { KEY : VAL , REST1 => REST1 }, .JSONList ] , ( REST2 => KEY : VAL , REST2 ) }
-    rule run TESTID : { "blocks" : [ { .JSONList }, .JSONList ] , REST } => run TESTID : { REST }
+    rule run TESTID : { "blocks" : [ .JSONList           ] , REST } => run TESTID : { REST }
+    rule run TESTID : { "blocks" : [ BLOCK:JSON , BLOCKS ] , REST } => run TESTID : BLOCK ~> run TESTID : { "blocks" : [ BLOCKS ] , REST }
 ```
 
 -   `#execKeys` are all the JSON nodes which should be considered for execution (between loading and checking).
