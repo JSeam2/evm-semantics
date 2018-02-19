@@ -165,6 +165,7 @@ Below are universal simplification rules that are free to be used in any context
   rule N +Int 0 => N
 
   rule N -Int 0 => N
+  rule N -Int N => 0
 
   rule 1 *Int N => N
   rule N *Int 1 => N
@@ -236,12 +237,31 @@ Below are simple lemmas for the modulo reduction.
   rule 0 <=Int chop(V)                     => true
   rule         chop(V) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
 
+  rule chop(A *Int B) => A *Int B    requires 0 <=Int A *Int B andBool A *Int B <Int (2 ^Int 256)
+  rule chop(A /Int B) => A /Int B    requires 0 <=Int A andBool A <Int (2 ^Int 256) andBool 0 <Int B andBool B <Int (2 ^Int 256)
+
   rule 0 <=Int keccak(V)                     => true
   rule         keccak(V) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
 
   rule 0 <=Int X &Int Y                     => true     requires 0 <=Int X andBool X <Int (2 ^Int 256) andBool 0 <=Int Y andBool Y <Int (2 ^Int 256)
   rule         X &Int Y <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
                                                         requires 0 <=Int X andBool X <Int (2 ^Int 256) andBool 0 <=Int Y andBool Y <Int (2 ^Int 256)
+  rule 0 <=Int X /Int Y                     => true     requires 0 <=Int X andBool X <Int (2 ^Int 256) andBool 0 <Int Y andBool Y <Int (2 ^Int 256)
+  rule         X /Int Y <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
+                                                        requires 0 <=Int X andBool X <Int (2 ^Int 256) andBool 0 <Int Y andBool Y <Int (2 ^Int 256)
+
+
+
+  syntax Int ::= "#roundpower" "(" Int "," Int "," Int "," Int ")"  [function]
+
+  rule #roundpower(ACC, BASEN, BASED, 0) => ACC
+
+  rule #roundpower((ACC *Int BASEN) /Int BASED, BASEN, BASED, EXPONENT) => #roundpower(ACC, BASEN, BASED, EXPONENT +Int 1)
+    requires EXPONENT >=Int 0
+
+  rule (A *Int B) /Int B => A       requires A =/=Int 0
+
+
 ```
 
 ### Wordstack
