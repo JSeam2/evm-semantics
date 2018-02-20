@@ -264,6 +264,7 @@ Below are simple lemmas for the modulo reduction.
 
   rule (A *Int B) /Int B => A       requires B =/=Int 0
 
+  rule (A *Int B) /Int A => B       requires A =/=Int 0
 
 ```
 
