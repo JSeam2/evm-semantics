@@ -97,6 +97,7 @@ _:Map
      andBool 0 <=Int ORIGIN_ID  andBool ORIGIN_ID  <Int (2 ^Int 160)
      andBool 0 <=Int CALL_DEPTH andBool CALL_DEPTH <Int 1024
      andBool 0 <=Int TO_ID     andBool TO_ID     <Int (2 ^Int 160)
+     andBool 0 <=Int STOPPED    andBool STOPPED    <Int (2 ^Int 256)
 andBool 0 <=Int VALUE     andBool VALUE     <Int (2 ^Int 256)
 andBool 0 <=Int BAL_FROM  andBool BAL_FROM  <Int (2 ^Int 256)
 andBool 0 <=Int BAL_TO    andBool BAL_TO    <Int (2 ^Int 256)
