@@ -252,14 +252,17 @@ Below are simple lemmas for the modulo reduction.
 
 
 
-  syntax Int ::= "#roundpower" "(" Int "," Int "," Int "," Int ")"  [function]
+  syntax Int ::= "#roundpower" "(" Int "," Int "," Int "," Int ")"  [function, smtlib(smt_roundpower)]
+
+  rule #roundpower(0, BASEN, BASED, EXPONENT) => 0
+    requires EXPONENT >=Int 0
 
   rule #roundpower(ACC, BASEN, BASED, 0) => ACC
 
   rule #roundpower((ACC *Int BASEN) /Int BASED, BASEN, BASED, EXPONENT) => #roundpower(ACC, BASEN, BASED, EXPONENT +Int 1)
     requires EXPONENT >=Int 0
 
-  rule (A *Int B) /Int B => A       requires A =/=Int 0
+  rule (A *Int B) /Int B => A       requires B =/=Int 0
 
 
 ```
