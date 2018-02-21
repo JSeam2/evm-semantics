@@ -2242,12 +2242,13 @@ Note: These are all functions as the operator `#gasExec` has already loaded all 
     syntax BExp ::= Bool
     syntax KResult ::= Bool
     syntax BExp ::= #accountNonexistent ( Int )
- // -------------------------------------------
+    syntax Bool ::= #accountEmpty ( WordStack , Int , Int ) [function, klabel(accountEmpty)]
+ // ----------------------------------------------------------------------------------------
     rule <k> #accountNonexistent(ACCT) => true ... </k>
          <activeAccounts> ACCTS </activeAccounts>
       requires notBool ACCT in ACCTS
 
-    rule <k> #accountNonexistent(ACCT) => NONCE ==Int 0 andBool BAL ==Int 0 andBool CODE ==K .WordStack andBool Gemptyisnonexistent << SCHED >> ... </k>
+    rule <k> #accountNonexistent(ACCT) => accountEmpty(CODE, NONCE, BAL) andBool Gemptyisnonexistent << SCHED >> ... </k>
          <schedule> SCHED </schedule>
          <account>
            <acctID>  ACCT  </acctID>
@@ -2256,6 +2257,8 @@ Note: These are all functions as the operator `#gasExec` has already loaded all 
            <code>    CODE  </code>
            ...
          </account>
+
+    rule #accountEmpty(CODE, NONCE, BAL) => CODE ==K .WordStack andBool NONCE ==Int 0 andBool BAL ==Int 0
 
     syntax Int ::= #allBut64th ( Int ) [function]
  // ---------------------------------------------
