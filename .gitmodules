@@ -11,3 +11,6 @@
 	path = .build/secp256k1
 	url = https://github.com/bitcoin-core/secp256k1
 	ignore = untracked
+[submodule "plugin"]
+	path = plugin
+	url = https://github.com/runtimeverification/blockchain-k-plugin
