@@ -251,6 +251,31 @@ Below are simple lemmas for the modulo reduction.
                                                         requires 0 <=Int X andBool X <Int (2 ^Int 256) andBool 0 <Int Y andBool Y <Int (2 ^Int 256)
 
 
+  rule chop(A -Int B) => A -Int B
+    requires 0 <=Int A andBool A <Int 2 ^Int 256 andBool A >=Int B
+
+  rule A +Int B <Int A => false
+    requires 0 <=Int B
+
+  rule A -Int B >Int A => false
+    requires 0 <=Int B
+
+  // uint canExtract = canExtractThisYear + (total - remainingTokens);
+  rule chop(A +Int (B -Int C)) => A +Int (B -Int C)
+    requires  0 <=Int B andBool B <Int 2 ^Int 256
+      andBool 0 <=Int C
+      andBool A <=Int C andBool B >=Int C
+
+  // r * 10 / 100 * (TIME % 365) / 365 <= r
+  rule (A *Int B) /Int C <=Int D => true
+    requires 0 <=Int A andBool A <=Int D andBool 0 <=Int B andBool B <=Int C
+
+  rule 0 <=Int A +Int (B -Int A) => true
+    requires 0 <=Int B andBool B <Int 2 ^Int 256
+
+  rule A +Int (B -Int A) <Int 2^Int 256 => true
+    requires 0 <=Int B andBool B <Int 2 ^Int 256
+
 
   syntax Int ::= "#roundpower" "(" Int "," Int "," Int "," Int ")"  [function, smtlib(smt_roundpower)]
 
@@ -266,10 +291,6 @@ Below are simple lemmas for the modulo reduction.
   rule 0 <=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
     requires  ACC >=Int 0
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
-
-  /*rule #roundpower(ACC, BASEN, BASED, EXPONENT) <=Int ACC => true
-    requires  ACC >=Int 0
-      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0*/
 
   rule ACC >=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
     requires  ACC >=Int 0
@@ -297,14 +318,36 @@ Below are simple lemmas for the modulo reduction.
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
       andBool A >=Int 0 andBool B >Int 0 andBool C >=Int 0
 
-  rule chop(A -Int B) => A -Int B
-    requires A >=Int 0 andBool A <Int 2 ^Int 256 andBool A >=Int B
+  rule #roundpower(ACC, BASEN, BASED, EXPONENT) *Int A /Int B *Int C <=Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
+    requires  ACC >=Int 0 andBool ACC *Int A /Int B *Int C <Int 2 ^Int 256
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
+      andBool A >=Int 0 andBool B >Int 0 andBool C >=Int 0
 
-  rule chop(A +Int (B -Int C)) => A +Int (B -Int C)
-    requires B <Int 2 ^Int 256 andBool A <=Int C andBool B >=Int C
 
-  rule (A *Int B) /Int C <=Int D => true
-    requires 0 <=Int A andBool A <=Int D andBool 0 <=Int B andBool B <=Int C
+  syntax Int ::= "#shouldReleaseSofar" "(" Int "," Int "," Int "," Int ")"  [function]
+
+  // proved manually
+  rule ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) >=Int COLLECTED => true
+    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+
+  rule 0 <=Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED => true
+    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+
+
+  rule 0 <=Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) => true
+    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+
+  rule ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
+    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+
+
+  // proved manually (canExtract > balance) --- if condition
+  rule ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED >Int BAL => false
+    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
+
+  // proved manually (balance >= canExtract) --- balance = sub(balance, canExtract)
+  rule BAL >=Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED => true
+    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
 
 ```
 

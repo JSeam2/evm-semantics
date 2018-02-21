@@ -42,7 +42,7 @@ module TRANSFER-SUCCESS-2-SPEC
 
         <substate>
           <selfDestruct> _ </selfDestruct>
-          <log> _:List ( .List => ListItem(#abiEventLog(ACCT_ID, "Transfer", #indexed(#address(CALLER_ID)), #indexed(#address(TO_ID)), #uint256(VALUE))) ) </log>
+          <log> _ => _</log>
           <refund> _ => _ </refund> // TODO: more detail
         </substate>
 
