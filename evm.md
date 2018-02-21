@@ -1376,7 +1376,8 @@ For now, I assume that they instantiate an empty account and use the empty data.
            ...
          </account>
 
-    rule <k> BALANCE ACCT => #newAccount ACCT ~> 0 ~> #push ... </k>
+    rule <k> BALANCE ACCT => #if EXECMODE ==K VMTESTS #then #newAccount ACCT #else . #fi ~> 0 ~> #push ... </k>
+         <mode> EXECMODE </mode>
          <activeAccounts> ACCTS </activeAccounts>
       requires notBool ACCT in ACCTS
 
@@ -1389,7 +1390,8 @@ For now, I assume that they instantiate an empty account and use the empty data.
            ...
          </account>
 
-    rule <k> EXTCODESIZE ACCT => #newAccount ACCT ~> 0 ~> #push ... </k>
+    rule <k> EXTCODESIZE ACCT => #if EXECMODE ==K VMTESTS #then #newAccount ACCT #else . #fi ~> 0 ~> #push ... </k>
+         <mode> EXECMODE </mode>
          <activeAccounts> ACCTS </activeAccounts>
       requires notBool ACCT in ACCTS
 ```
@@ -1408,7 +1410,8 @@ Should we pad zeros (for the copied "program")?
            ...
          </account>
 
-    rule <k> EXTCODECOPY ACCT MEMSTART PGMSTART WIDTH => #newAccount ACCT ... </k>
+    rule <k> EXTCODECOPY ACCT MEMSTART PGMSTART WIDTH => #if EXECMODE ==K VMTESTS #then #newAccount ACCT #else . #fi ... </k>
+         <mode> EXECMODE </mode>
          <activeAccounts> ACCTS </activeAccounts>
       requires notBool ACCT in ACCTS
 ```
