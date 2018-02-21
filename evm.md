@@ -1069,7 +1069,10 @@ These are just used by the other operators for shuffling local execution state a
 
     rule <k> (. => #newAccount ACCTTO) ~> #transferFunds ACCTFROM ACCTTO VALUE ... </k>
          <activeAccounts> ACCTS </activeAccounts>
-      requires ACCTFROM =/=K ACCTTO andBool notBool ACCTTO in ACCTS
+         <schedule> SCHED </schedule>
+      requires ACCTFROM =/=K ACCTTO 
+       andBool notBool ACCTTO in ACCTS 
+       andBool (VALUE >Int 0 orBool notBool Gemptyisnonexistent << SCHED >>)
 
     rule <k> #transferFunds ACCT ACCT VALUE => . ... </k>
          <account>
@@ -1078,6 +1081,13 @@ These are just used by the other operators for shuffling local execution state a
            ...
          </account>
       requires VALUE <=Int ORIGFROM
+
+    rule <k> #transferFunds ACCTFROM ACCTTO 0 => . ... </k>
+         <activeAccounts> ACCTS </activeAccounts>
+         <schedule> SCHED </schedule>
+      requires ACCTFROM =/=K ACCTTO 
+       andBool notBool ACCTTO in ACCTS 
+       andBool Gemptyisnonexistent << SCHED >>
 ```
 
 ### Invalid Operator
