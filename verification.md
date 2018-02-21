@@ -255,51 +255,47 @@ Below are simple lemmas for the modulo reduction.
   syntax Int ::= "#roundpower" "(" Int "," Int "," Int "," Int ")"  [function, smtlib(smt_roundpower)]
 
   rule #roundpower(0, BASEN, BASED, EXPONENT) => 0
-    requires EXPONENT >=Int 0
+    requires BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule #roundpower(ACC, BASEN, BASED, 0) => ACC
+    requires BASEN >Int 0 andBool BASED >=Int BASEN
 
   rule #roundpower((ACC *Int BASEN) /Int BASED, BASEN, BASED, EXPONENT) => #roundpower(ACC, BASEN, BASED, EXPONENT +Int 1)
-    requires EXPONENT >=Int 0
-
-  rule (A *Int B) /Int B => A       requires B =/=Int 0
-
-  rule (A *Int B) /Int A => B       requires A =/=Int 0
+    requires BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule 0 <=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
     requires  ACC >=Int 0
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
-  rule #roundpower(ACC, BASEN, BASED, EXPONENT) <=Int ACC => true
+  /*rule #roundpower(ACC, BASEN, BASED, EXPONENT) <=Int ACC => true
     requires  ACC >=Int 0
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0*/
+
+  rule ACC >=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
+    requires  ACC >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule #roundpower(ACC, BASEN, BASED, EXPONENT) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
     requires  ACC >=Int 0 andBool ACC <Int 2 ^Int 256
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
-  rule 0 <=Int (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int A) => true
+  rule 0 <=Int (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int 10) => true
     requires  ACC >=Int 0
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
-      andBool A >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
-  rule #roundpower(ACC, BASEN, BASED, EXPONENT) *Int A <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
-    //requires  ACC >=Int 0 andBool ACC *Int 90 <Int 2 ^Int 256
-    //  andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
+  rule (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int 10) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
+    requires  ACC >=Int 0 andBool ACC *Int 90 <Int 2 ^Int 256
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule 0 <=Int (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int A /Int B *Int C) => true
     requires  ACC >=Int 0
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
       andBool A >=Int 0 andBool B >Int 0 andBool C >=Int 0
 
   rule #roundpower(ACC, BASEN, BASED, EXPONENT) *Int A /Int B *Int C <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
     requires  ACC >=Int 0 andBool ACC *Int A /Int B *Int C <Int 2 ^Int 256
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
       andBool A >=Int 0 andBool B >Int 0 andBool C >=Int 0
-
-  rule ACC >=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
-    requires  ACC >=Int 0
-      andBool BASEN >=Int 0 andBool BASED >Int BASEN andBool EXPONENT >=Int 0
 
   rule chop(A -Int B) => A -Int B
     requires A >=Int 0 andBool A <Int 2 ^Int 256 andBool A >=Int B

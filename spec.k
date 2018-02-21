@@ -106,7 +106,7 @@ module COLLECTTOKEN-SPEC
       andBool 0 <=Int (NOW -Int START) andBool (NOW -Int START) <Int (2 ^Int 256)
       andBool 0 <=Int ((NOW -Int START) /Int 31536000) andBool ((NOW -Int START) /Int 31536000) <Int (2 ^Int 256)
       // canExtract >=Int 0
-      andBool ((#roundpower(COLLECTED +Int BAL, 90, 100, (NOW -Int START) /Int 31536000) *Int 10 /Int 100) *Int (NOW -Int START) %Int 31536000) /Int 3153600 +Int (COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, (NOW -Int START) /Int 31536000) >=Int COLLECTED 
+      andBool ((#roundpower(COLLECTED +Int BAL, 90, 100, (NOW -Int START) /Int 31536000) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 3153600 +Int (COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, (NOW -Int START) /Int 31536000) >=Int COLLECTED
       andBool GASCAP >=Int (293 *Int ((NOW -Int START) /Int 31536000)) +Int 100000
 
 
