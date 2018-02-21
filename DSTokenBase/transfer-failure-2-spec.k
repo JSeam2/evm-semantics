@@ -42,7 +42,7 @@ module TRANSFER-FAILURE-2-SPEC
 
         <substate>
           <selfDestruct> _ </selfDestruct>
-          <log> _ </log>
+          <log> _ => _ </log>
           <refund> _ => _ </refund> // TODO: more detail
         </substate>
 

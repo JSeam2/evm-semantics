@@ -42,7 +42,7 @@ module TRANSFER-FAILURE-2-SPEC
 
         <substate>
           <selfDestruct> _ </selfDestruct>
-          <log> _ </log>
+          <log> _ => _</log>
           <refund> _ => _ </refund> // TODO: more detail
         </substate>
 
@@ -102,8 +102,7 @@ andBool 0 <=Int VALUE     andBool VALUE     <Int (2 ^Int 256)
 andBool 0 <=Int BAL_FROM  andBool BAL_FROM  <Int (2 ^Int 256)
 andBool 0 <=Int BAL_TO    andBool BAL_TO    <Int (2 ^Int 256)
 andBool CALLER_ID ==Int TO_ID
-andBool ( VALUE >Int BAL_FROM
-orBool STOPPED ==Int 1 )
+andBool VALUE >Int BAL_FROM
 
   // to avoid unnecessary case analyses
   rule <k> LT W0 W1 => bool2int(W0  <Int W1) ~> #push ... </k> [trusted]
