@@ -128,11 +128,11 @@ In the comments next to each cell, we've marked which component of the YellowPap
 ```
 
 ```k
-                          <acctID>  0          </acctID>
-                          <balance> 0          </balance>
-                          <code>    .WordStack </code>
-                          <storage> .Map       </storage>
-                          <nonce>   0          </nonce>
+                          <acctID>  0                      </acctID>
+                          <balance> 0                      </balance>
+                          <code>    .WordStack:AccountCode </code>
+                          <storage> .Map                   </storage>
+                          <nonce>   0                      </nonce>
                         </account>
                       </accounts>
 
@@ -174,7 +174,8 @@ In the comments next to each cell, we've marked which component of the YellowPap
                   </ethereum>
 
     syntax EthereumSimulation
- // -------------------------
+    syntax AccountCode ::= WordStack
+ // --------------------------------
 ```
 
 Modal Semantics

@@ -8,6 +8,10 @@ Actual execution of the EVM is defined in [the EVM file](../evm).
 requires "verification.k"
 ```
 
+```{.k .node}
+requires "evm-node.k"
+```
+
 ```k
 requires "evm.k"
 requires "analysis.k"
@@ -23,6 +27,10 @@ module ETHEREUM-SIMULATION
 
 ```{.k .java}
     imports VERIFICATION
+```
+
+```{.k .node}
+    imports EVM-NODE
 ```
 
 An Ethereum simulation is a list of Ethereum commands.
