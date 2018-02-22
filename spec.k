@@ -99,12 +99,8 @@ module COLLECTTOKEN-SPEC
       andBool 0 <Int NOW         andBool NOW <Int (2 ^Int 256)
       andBool 0 <Int START       andBool START <Int (2 ^Int 256)
 
-      andBool 0 <=Int (COLLECTED +Int BAL) andBool (COLLECTED +Int BAL) <Int (2 ^Int 256)
-      andBool 0 <=Int (COLLECTED +Int BAL) *Int 90 andBool (COLLECTED +Int BAL) *Int 90 <Int (2 ^Int 256)
-      andBool 0 <=Int (COLLECTED +Int BAL) *Int 10 /Int 100 *Int 31535999
-      andBool (COLLECTED +Int BAL) *Int 10 /Int 100 *Int 31535999 <Int (2 ^Int 256)
+      andBool 0 <=Int (COLLECTED +Int BAL) andBool (COLLECTED +Int BAL) *Int 3153600 <Int (2 ^Int 256)
       andBool 0 <Int (NOW -Int START) andBool (NOW -Int START) <Int (2 ^Int 256)
-      andBool 0 <=Int ((NOW -Int START) /Int 31536000) andBool ((NOW -Int START) /Int 31536000) <Int (2 ^Int 256)
       // canExtract >= 0
       andBool #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
       // canExtract > balance
@@ -112,7 +108,7 @@ module COLLECTTOKEN-SPEC
       // Max Gas
       andBool GASCAP >=Int (293 *Int ((NOW -Int START) /Int 31536000)) +Int 100000
     ensures
-      VALUE ==Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED
+      VALUE ==Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int BAL -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)
 
 
   // mul
@@ -293,16 +289,14 @@ module COLLECTTOKEN-SPEC
         <messages> _ </messages>
       </network>
     </ethereum>
-    requires 0 <=Int ACCT_ID    andBool ACCT_ID <Int (2 ^Int 160)
+    requires  0 <=Int ACCT_ID    andBool ACCT_ID <Int (2 ^Int 160)
       andBool 0 <=Int CALLER_ID  andBool CALLER_ID <Int (2 ^Int 160)
       andBool 0 <=Int ORIGIN_ID  andBool ORIGIN_ID  <Int (2 ^Int 160)
       andBool 0 <=Int CALL_DEPTH andBool CALL_DEPTH <Int 1024
-      andBool 0 <=Int INDEX andBool INDEX <=Int YEARCOUNT
-      andBool 0 <=Int YEARCOUNT andBool YEARCOUNT <Int (2 ^Int 256)
+      andBool 0 <=Int INDEX      andBool INDEX <=Int YEARCOUNT
+      andBool 0 <=Int YEARCOUNT  andBool YEARCOUNT <Int (2 ^Int 256)
+      andBool 0 <=Int REMAINING  andBool REMAINING *Int 90 <Int (2 ^Int 256)
       andBool GASNUM >=Int ((293 *Int (YEARCOUNT -Int INDEX)) +Int 26)
-      andBool 0 <=Int REMAINING andBool REMAINING <Int (2 ^Int 256)
-      andBool 0 <=Int REMAINING *Int 90 andBool REMAINING *Int 90 <Int (2^Int 256)
-    [trusted]
 
 
   // to avoid unnecessary case analyses

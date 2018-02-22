@@ -270,13 +270,6 @@ Below are simple lemmas for the modulo reduction.
   rule (A *Int B) /Int C <=Int D => true
     requires 0 <=Int A andBool A <=Int D andBool 0 <=Int B andBool B <=Int C
 
-  rule 0 <=Int A +Int (B -Int A) => true
-    requires 0 <=Int B andBool B <Int 2 ^Int 256
-
-  rule A +Int (B -Int A) <Int 2^Int 256 => true
-    requires 0 <=Int B andBool B <Int 2 ^Int 256
-
-
   syntax Int ::= "#roundpower" "(" Int "," Int "," Int "," Int ")"  [function, smtlib(smt_roundpower)]
 
   rule #roundpower(0, BASEN, BASED, EXPONENT) => 0
@@ -292,12 +285,12 @@ Below are simple lemmas for the modulo reduction.
     requires  ACC >=Int 0
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
-  rule ACC >=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
-    requires  ACC >=Int 0
-      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
-
   rule #roundpower(ACC, BASEN, BASED, EXPONENT) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
     requires  ACC >=Int 0 andBool ACC <Int 2 ^Int 256
+      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
+
+  rule ACC >=Int #roundpower(ACC, BASEN, BASED, EXPONENT) => true
+    requires  ACC >=Int 0
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule 0 <=Int (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int 10) => true
@@ -305,7 +298,7 @@ Below are simple lemmas for the modulo reduction.
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int 10) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
-    requires  ACC >=Int 0 andBool ACC *Int 90 <Int 2 ^Int 256
+    requires  ACC >=Int 0 andBool ACC *Int 10 <Int 2 ^Int 256
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
 
   rule 0 <=Int (#roundpower(ACC, BASEN, BASED, EXPONENT) *Int A /Int B *Int C) => true
@@ -318,36 +311,40 @@ Below are simple lemmas for the modulo reduction.
       andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
       andBool A >=Int 0 andBool B >Int 0 andBool C >=Int 0
 
-  rule #roundpower(ACC, BASEN, BASED, EXPONENT) *Int A /Int B *Int C <=Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
-    requires  ACC >=Int 0 andBool ACC *Int A /Int B *Int C <Int 2 ^Int 256
-      andBool BASEN >Int 0 andBool BASED >=Int BASEN andBool EXPONENT >=Int 0
-      andBool A >=Int 0 andBool B >Int 0 andBool C >=Int 0
+
+  syntax Int ::= "@remainingTokens" "(" Int "," Int "," Int ")"
+               | "@canExtractThisYear" "(" Int "," Int "," Int ")"
+
+  rule @remainingTokens(TOTAL, NOW, START) => #roundpower(TOTAL, 90, 100, (NOW -Int START) /Int 31536000)  [macro]
+
+  rule @canExtractThisYear(TOTAL, NOW, START) => ((#roundpower(TOTAL, 90, 100, (NOW -Int START) /Int 31536000) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000  [macro]
 
 
   syntax Int ::= "#shouldReleaseSofar" "(" Int "," Int "," Int "," Int ")"  [function]
 
   // proved manually
-  rule ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) >=Int COLLECTED => true
+  rule @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) >=Int COLLECTED => true
     requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
-  rule 0 <=Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED => true
+  rule 0 <=Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) -Int COLLECTED => true
     requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
 
-  rule 0 <=Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) => true
+  rule 0 <=Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) => true
     requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
-  rule ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
+  rule @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
     requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
 
   // proved manually (canExtract > balance) --- if condition
-  rule ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED >Int BAL => false
+  rule @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) -Int COLLECTED >Int BAL => false
     requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
 
   // proved manually (balance >= canExtract) --- balance = sub(balance, canExtract)
-  rule BAL >=Int ((#roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000)) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000 +Int ((COLLECTED +Int BAL) -Int #roundpower(COLLECTED +Int BAL, 90, 100, ((NOW -Int START) /Int 31536000))) -Int COLLECTED => true
+  rule BAL >=Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) -Int COLLECTED => true
     requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
+
 
 ```
 
