@@ -173,11 +173,6 @@ tests/proofs/sum-to-n-spec.k: proofs/sum-to-n.md
 	mkdir -p $(dir $@)
 	pandoc --from markdown --to tangle.lua --metadata=code:sum-to-n $< > $@
 
-tests/proofs/hkg/%-spec.k: proofs/hkg.md
-	@echo "==  tangle: $@"
-	mkdir -p $(dir $@)
-	pandoc --from markdown --to tangle.lua --metadata=code:$* $< > $@
-
 # InteractiveTests
 
 interactive-test-all: interactive-test
