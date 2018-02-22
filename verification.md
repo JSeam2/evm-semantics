@@ -237,8 +237,7 @@ Below are simple lemmas for the modulo reduction.
   rule 0 <=Int chop(V)                     => true
   rule         chop(V) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
 
-  rule chop(A *Int B) => A *Int B    requires 0 <=Int A *Int B andBool A *Int B <Int (2 ^Int 256)
-  rule chop(A /Int B) => A /Int B    requires 0 <=Int A andBool A <Int (2 ^Int 256) andBool 0 <Int B andBool B <Int (2 ^Int 256)
+  rule chop(X) => X   requires 0 <=Int X andBool X <Int (2 ^Int 256)
 
   rule 0 <=Int keccak(V)                     => true
   rule         keccak(V) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
