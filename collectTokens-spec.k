@@ -209,7 +209,7 @@ module COLLECTTOKEN-SPEC
     <ethereum>
       <evm>
         <output> _ </output>
-        <memoryUsed> 3 </memoryUsed>
+        <memoryUsed> MU </memoryUsed>
         <callDepth> CALL_DEPTH </callDepth>
         <callStack> _ => _ </callStack>
         <interimStates> _ </interimStates>
@@ -231,7 +231,7 @@ module COLLECTTOKEN-SPEC
           </wordStack>
           <localMem> _ </localMem>
           <pc> 498 => 545 </pc>
-          <gas> GASNUM => GASNUM -Int (293 *Int (YEARCOUNT -Int INDEX)) -Int 26 </gas>
+          <gas> GASCAP => GASCAP -Int (293 *Int (YEARCOUNT -Int INDEX)) -Int 26 </gas>
           <previousGas> _ => _ </previousGas>
 
           <static> false </static> // NOTE: non-static call
@@ -289,14 +289,15 @@ module COLLECTTOKEN-SPEC
         <messages> _ </messages>
       </network>
     </ethereum>
-    requires  0 <=Int ACCT_ID    andBool ACCT_ID <Int (2 ^Int 160)
-      andBool 0 <=Int CALLER_ID  andBool CALLER_ID <Int (2 ^Int 160)
+    requires  0 <=Int ACCT_ID    andBool ACCT_ID    <Int (2 ^Int 160)
+      andBool 0 <=Int CALLER_ID  andBool CALLER_ID  <Int (2 ^Int 160)
       andBool 0 <=Int ORIGIN_ID  andBool ORIGIN_ID  <Int (2 ^Int 160)
+      andBool 0 <=Int MU         andBool MU         <Int (2 ^Int 256)
       andBool 0 <=Int CALL_DEPTH andBool CALL_DEPTH <Int 1024
       andBool 0 <=Int INDEX      andBool INDEX <=Int YEARCOUNT
       andBool 0 <=Int YEARCOUNT  andBool YEARCOUNT <Int (2 ^Int 256)
       andBool 0 <=Int REMAINING  andBool REMAINING *Int 90 <Int (2 ^Int 256)
-      andBool GASNUM >=Int ((293 *Int (YEARCOUNT -Int INDEX)) +Int 26)
+      andBool GASCAP >=Int ((293 *Int (YEARCOUNT -Int INDEX)) +Int 26)
 
 
   // to avoid unnecessary case analyses
