@@ -319,30 +319,30 @@ Below are simple lemmas for the modulo reduction.
   rule @canExtractThisYear(TOTAL, NOW, START) => ((#roundpower(TOTAL, 90, 100, (NOW -Int START) /Int 31536000) *Int 10 /Int 100) *Int ((NOW -Int START) %Int 31536000)) /Int 31536000  [macro]
 
 
-  syntax Int ::= "#shouldReleaseSofar" "(" Int "," Int "," Int "," Int ")"  [function]
+  syntax Int ::= "#accumulatedReleasedTokens" "(" Int "," Int "," Int "," Int ")"  [function]
 
   // proved manually
   rule @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) >=Int COLLECTED => true
-    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+    requires #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
   rule 0 <=Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) -Int COLLECTED => true
-    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+    requires #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
 
   rule 0 <=Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) => true
-    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+    requires #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
   rule @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) <Int /* 2 ^Int 256 */ 115792089237316195423570985008687907853269984665640564039457584007913129639936 => true
-    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+    requires #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
 
 
   // proved manually (canExtract > balance) --- if condition
   rule @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) -Int COLLECTED >Int BAL => false
-    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
+    requires #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
 
   // proved manually (balance >= canExtract) --- balance = sub(balance, canExtract)
   rule BAL >=Int @canExtractThisYear(COLLECTED +Int BAL, NOW, START) +Int ((COLLECTED +Int BAL) -Int @remainingTokens(COLLECTED +Int BAL, NOW, START)) -Int COLLECTED => true
-    requires #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
+    requires #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
 
 
 ```

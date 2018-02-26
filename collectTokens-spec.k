@@ -102,9 +102,9 @@ module COLLECTTOKEN-SPEC
       andBool 0 <=Int (COLLECTED +Int BAL) andBool (COLLECTED +Int BAL) *Int 3153600 <Int (2 ^Int 256)
       andBool 0 <Int (NOW -Int START) andBool (NOW -Int START) <Int (2 ^Int 256)
       // canExtract >= 0
-      andBool #shouldReleaseSofar(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
+      andBool #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) >Int COLLECTED +Int 3
       // canExtract > balance
-      andBool #shouldReleaseSofar(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
+      andBool #accumulatedReleasedTokens(BAL, COLLECTED, START, NOW) <Int (BAL +Int COLLECTED) -Int 10
       // Max Gas
       andBool GASCAP >=Int (293 *Int ((NOW -Int START) /Int 31536000)) +Int 100000
     ensures
