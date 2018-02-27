@@ -1,6 +1,4 @@
-module {MODULE}-SPEC
-  imports ETHEREUM-SIMULATION
-
+  // {RULENAME}
   rule
     <k> {K} </k>
     <exit-code> 1 </exit-code>
@@ -11,12 +9,13 @@ module {MODULE}-SPEC
     <ethereum>
       <evm>
         <output> {OUTPUT} </output>
-        <memoryUsed> 0 => _ </memoryUsed>
+        <memoryUsed> {MEMORYUSED} </memoryUsed>
         <callDepth> CALL_DEPTH </callDepth>
         <callStack> _ => _ </callStack>
         <interimStates> _ </interimStates>
         <substateStack> _ </substateStack>
         <callLog> .Set </callLog> // for vmtest only
+        <touchedAccounts> _ => _ </touchedAccounts>
 
         <txExecState>
           <program> #asMapOpCodes(#dasmOpCodes(#parseByteStack({CODE}), BYZANTIUM)) </program>
@@ -28,9 +27,9 @@ module {MODULE}-SPEC
           <callData> {CALLDATA} </callData>
 
           <callValue> 0 </callValue>
-          <wordStack> .WordStack => _ </wordStack>
+          <wordStack> {WORDSTACK} </wordStack>
           <localMem> {LOCALMEM} </localMem>
-          <pc> 0 => _ </pc>
+          <pc> {PC} </pc>
           <gas> {GAS} </gas>
           <previousGas> _ => _ </previousGas>
 
@@ -75,7 +74,7 @@ module {MODULE}-SPEC
             <balance> _ </balance>
             <code> #parseByteStack({CODE}) </code>
             <storage>
-              {STORAGE}
+{STORAGE}
             </storage>
             <nonce> _ </nonce>
           </account>
@@ -92,13 +91,6 @@ module {MODULE}-SPEC
      andBool 0 <=Int ORIGIN_ID  andBool ORIGIN_ID  <Int (2 ^Int 160)
      andBool 0 <=Int NOW        andBool NOW        <Int (2 ^Int 256)
      andBool 0 <=Int CALL_DEPTH andBool CALL_DEPTH <Int 1024
-     {REQUIRES}
-
-
-  // to avoid unnecessary case analyses
-  rule <k> LT W0 W1 => bool2int(W0  <Int W1) ~> #push ... </k> [trusted]
-  rule <k> GT W0 W1 => bool2int(W0  >Int W1) ~> #push ... </k> [trusted]
-  rule <k> EQ W0 W1 => bool2int(W0 ==Int W1) ~> #push ... </k> [trusted]
-  rule <k> ISZERO W => bool2int(W  ==Int 0 ) ~> #push ... </k> [trusted]
-
-endmodule
+{REQUIRES}
+{ENSURES}
+{ATTRIBUTE}

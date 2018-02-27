@@ -59,7 +59,7 @@ module COLLECTTOKEN-SPEC
         <number> _ </number>
         <gasLimit> _ </gasLimit>
         <gasUsed> _ </gasUsed>
-        <timestamp> _ </timestamp>
+        <timestamp> NOW </timestamp>
         <extraData> _ </extraData>
         <mixHash> _ </mixHash>
         <blockNonce> _ </blockNonce>
